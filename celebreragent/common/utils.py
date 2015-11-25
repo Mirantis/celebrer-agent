@@ -1,60 +1,33 @@
 import base64
-import requests
-import csv
-import socket
-import StringIO
 import commands
 import os
 
+from . import service
+
+OS_COMPONENT_LIST = [
+    "cinder",
+    "glance",
+    "heat",
+    "keystone",
+    "mistral",
+    "murano",
+    "neutron",
+    "nova",
+]
+
+
 def detect_services():
-    def ha_get_stats_url():
-        return "http://%s:10000/;csv" % \
-               commands.getoutput('cat /etc/hiera/globals.yaml | grep manage'
-                                  'ment_vip | grep -E -o "([0-9]{1,3}[\.]){3'
-                                  '}[0-9]{1,3}"')
+    service_map = {}
 
-    def ha_get_services(ha_stats_url):
-        hostname = socket.gethostname().split(".")[0]
-        data = requests.get(ha_stats_url).text.replace("#",'')
-        svc = []
-        f = StringIO.StringIO(data)
-        reader = csv.reader(data.split('\n'), delimiter=',')
-        for row in reader:
-            if hostname in row:
-                if '-' in row[0]:
-                    svc.append(row[0].split("-")[0])
-        return list(set(svc))
+    for startup_file in [ some_file for some_file in os.listdir("/etc/init/") if some_file.endswith(".conf") ]:
+        component = os.path.basename(startup_file).split("-")[0]
 
-    def process_num(process):
-        return commands.getoutput("ps aux | awk {' print $12'} | grep %s" %
-                                  process).split("\n")
+        if component in OS_COMPONENT_LIST:
+            if component not in service_map.keys():
+                service_map[component] = []
+            service_map[component].append(service.Service(os.path.join("/etc/init", startup_file)))
 
-    def svc_add(svc_list, svc_name):
-        if commands.getoutput("ps aux | grep %s | wc -l" % svc_name) > 1 and \
-                        svc_name not in svc_list:
-            svc_list.append(svc_name)
-        return svc_list
-
-    svc_list = ha_get_services(ha_get_stats_url())
-    for service in ['nova', 'neutron']:
-        svc_list = svc_add(svc_list, service)
-    svc_dict = {}
-    for item in svc_list:
-        data = process_num(item)
-        for item in data:
-            if not "/" in item and not "-" in item:
-                svc_key = item
-                break
-        svc_dict[svc_key] = list(set(data))
-        svc_dict[svc_key].remove(svc_key)
-
-    for item in svc_list:
-        temp = []
-        for subitem in svc_dict[item]:
-            temp.append(subitem.split("/")[-1])
-        svc_dict[item] = temp
-
-    return svc_dict
+    return service_map
 
 
 def prepare_data(data, method):
