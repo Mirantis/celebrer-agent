@@ -1,31 +1,33 @@
 import base64
 import commands
+import json
 import os
 
 from . import service
 
-OS_COMPONENT_LIST = [
-    "cinder",
-    "glance",
-    "heat",
-    "keystone",
-    "mistral",
-    "murano",
-    "neutron",
-    "nova",
-]
-
 
 def detect_services():
-    service_map = {}
 
-    for startup_file in [ some_file for some_file in os.listdir("/etc/init/") if some_file.endswith(".conf") ]:
+    def _load_components_from_json(path):
+        enabled_components = []
+        with open(path) as json_file:
+            json_data = json.load(json_file)
+        for item in json_data.keys():
+            if json_data[item]:
+                enabled_components.append(item)
+        return enabled_components
+
+    service_map = {}
+    for startup_file in [some_file for some_file in os.listdir("/etc/init/")
+                         if some_file.endswith(".conf")]:
         component = os.path.basename(startup_file).split("-")[0]
 
-        if component in OS_COMPONENT_LIST:
+        if component in _load_components_from_json(
+                '../etc/supported_components.json'):
             if component not in service_map.keys():
                 service_map[component] = []
-            service_map[component].append(service.Service(os.path.join("/etc/init", startup_file)))
+            service_map[component].append(
+                service.Service(os.path.join("/etc/init", startup_file)))
 
     return service_map
 

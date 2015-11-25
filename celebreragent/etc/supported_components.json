@@ -1,0 +1,13 @@
+{
+  "nova": true,
+  "cinder": true,
+  "swift": true,
+  "ceph": true,
+  "sahara": true,
+  "murano": true,
+  "glance": true,
+  "heat": true,
+  "mistral": true,
+  "neutron": false,
+  "keystone": false
+}
