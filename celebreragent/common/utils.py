@@ -5,6 +5,8 @@ import os
 
 from . import service
 
+PATH_STACK = []
+
 
 def detect_services():
 
@@ -43,10 +45,9 @@ def prepare_data(data, method):
 
 
 def combine(path):
-    cwd = os.getcwd()
-    os.chdir(path)
+    pushd(path)
     commands.getoutput('%s combine' % coverage_bin())
-    os.chdir(cwd)
+    popd()
 
 
 def coverage_bin():
@@ -54,3 +55,18 @@ def coverage_bin():
         if not commands.getstatusoutput(command)[0]:
             return command
         return None
+
+
+def pushd(path):
+    global PATH_STACK
+    current_path = os.getcwd()
+
+    PATH_STACK.append(current_path)
+    os.chdir(path)
+
+
+def popd():
+    global PATH_STACK
+
+    if len(PATH_STACK) > 0:
+        os.chdir(PATH_STACK.pop())

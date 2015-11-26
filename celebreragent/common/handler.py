@@ -34,7 +34,7 @@ class CelebrerHandler(object):
                 shutil.rmtree(cov_path)
 
             os.mkdir(cov_path)
-            os.chdir(cov_path)
+            utils.pushd(cov_path)
 
             print "RUN: %s" % cmd_run
 
@@ -46,6 +46,8 @@ class CelebrerHandler(object):
                 pass
             else:
                 commands.getoutput('service %s start' % service_name)
+
+            utils.popd()
 
     def stop_coverage(self, context, service_name, component_name):
         os.system('kill $(ps hf -C %s | grep "%s" | '
@@ -105,8 +107,7 @@ class CelebrerHandler(object):
             str(time.time())
         )
 
-        cwd = os.getcwd()
-        os.chdir(cov_path)
+        utils.pushd(cov_path)
 
         commands.getoutput('%s xml' % self.agent.get_coverage_exec())
         commands.getoutput('%s html' % self.agent.get_coverage_exec())
@@ -127,5 +128,5 @@ class CelebrerHandler(object):
                 component_name=component_name,
                 binary_data=base64.b64encode(binary_report.read())
             )
-        os.chdir(cwd)
+        utils.popd()
         shutil.rmtree(cov_path)
