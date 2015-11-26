@@ -124,6 +124,6 @@ class CelebrerHandler(object):
             self.agent.call_rpc(
                 'reports', 'collect_report',
                 component_name=component_name,
-                binary_data=base64.b64encode(binary_report)
+                binary_data=base64.b64encode(binary_report.read())
             )
         os.chdir(cwd)
