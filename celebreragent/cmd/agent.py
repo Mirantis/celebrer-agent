@@ -108,6 +108,13 @@ class CelebrerAgent(object):
                 launcher.launch_service(
                     self._prepare_rpc_service(component, self._ENDPOINTS))
 
+            self.call_rpc("discovery", "discover_services",
+                          services={
+                              component: service.service_name for
+                              component, service in self._SERVICES.items()
+                          },
+                          node_uuid=self.get_instance_id())
+
             launcher.wait()
         except RuntimeError as e:
             sys.stderr.write("ERROR: %s\n" % e)
