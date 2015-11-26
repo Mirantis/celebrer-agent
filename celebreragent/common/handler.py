@@ -41,11 +41,17 @@ class CelebrerHandler(object):
                 os.system(cmd_run)
 
                 time.sleep(3)
-
                 if service_name not in commands.getoutput("ps aux"):
                     commands.getoutput('service %s start' % service_name)
+                    service_status = 'Failure'
+                else:
+                    service_status = 'Started'
 
                 utils.popd()
+                self.agent.call_rpc('reports', 'set_status',
+                                    service_name=service_name,
+                                    server_id=self.agent.get_instance_id(),
+                                    status=service_status)
 
     def stop_coverage(self, context, services):
         for service_name in services:
@@ -87,6 +93,10 @@ class CelebrerHandler(object):
                         ),
                         node_uuid=self.agent.get_instance_id()
                     )
+            self.agent.call_rpc('reports', 'set_status',
+                                service_name=service_name,
+                                server_id=self.agent.get_instance_id(),
+                                status='Stopped')
 
     def collect_coverage(self, component_name, binary_data, node_uuid):
         combine_path = '/tmp/coverage-combine_%s' % component_name
