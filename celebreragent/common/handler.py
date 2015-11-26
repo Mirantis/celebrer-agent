@@ -22,8 +22,8 @@ class CelebrerHandler(object):
             commands.getoutput("service %s stop" % service_name)
             print "Service %s stoppped" % service_name
 
-            cmd_run = "python-coverage run --source=%s --parallel-mode %s &" % (
-                component, "%s %s" % (
+            cmd_run = "%s run --source=%s --parallel-mode %s &" % (
+                cls.agent._COVERAGE_EXEC, component, "%s %s" % (
                     service.service_params['exec'],
                     service.service_args
                 )
@@ -50,8 +50,9 @@ class CelebrerHandler(object):
 
     @classmethod
     def stop_coverage(cls, context, service_name, component_name):
-        os.system('kill $(ps hf -C python-coverage | grep "%s" | '
-                  'awk "{print \$1;exit}");' % (service_name))
+        os.system('kill $(ps hf -C %s | grep "%s" | '
+                  'awk "{print \$1;exit}");' % (cls.agent._COVERAGE_EXEC ,
+                                                service_name))
 
         commands.getoutput('service %s start' % service_name)
 
@@ -111,10 +112,11 @@ class CelebrerHandler(object):
         cwd = os.getcwd()
         os.chdir(cov_path)
 
-        commands.getoutput('python-coverage xml')
-        commands.getoutput('python-coverage html')
-        commands.getoutput('python-coverage report --omit=*/openstack/*,'
-                           '*/tests/* -m > report_%s.txt' % component_name)
+        commands.getoutput('%s xml' % cls.agent._COVERAGE_EXEC)
+        commands.getoutput('%s html')
+        commands.getoutput('%s report --omit=*/openstack/*,*/tests/* -m > '
+                           'report_%s.txt' % (cls.agent._COVERAGE_EXEC,
+                                              component_name))
 
         tar_file = tarfile.open(report_file_name, 'w:gz')
         file_list = os.listdir(cov_path)

@@ -34,7 +34,7 @@ class CelebrerAgent(object):
         self._ENDPOINTS = [CelebrerHandler(self)]
         self._SERVICES = utils.detect_services()
         try:
-            self._check_coverage_utility()
+            self._COVERAGE_EXEC = self._check_coverage_utility()
         except EnvironmentError as e:
             print e.message
             exit()

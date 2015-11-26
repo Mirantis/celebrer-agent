@@ -44,7 +44,7 @@ def prepare_data(data, method):
 def combine(path):
     cwd = os.getcwd()
     os.chdir(path)
-    commands.getoutput('python-coverage combine')
+    commands.getoutput('%s combine' % coverage_bin())
     os.chdir(cwd)
 
 
