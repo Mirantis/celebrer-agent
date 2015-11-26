@@ -41,8 +41,10 @@ class CelebrerAgent(object):
             exit()
 
     def _check_coverage_utility(self):
-        if not utils.coverage_bin():
+        executable_path = utils.coverage_bin()
+        if not executable_path:
             raise EnvironmentError("Not found coverage.py utility")
+        return executable_path
 
     def _prepare_rpc_service(self, rkey, endpoints):
         transport = messaging.get_transport(self._CONF)
