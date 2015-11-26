@@ -17,13 +17,15 @@ def detect_services():
                 enabled_components.append(item)
         return enabled_components
 
+    def _module_location():
+        return os.path.dirname(os.path.abspath(service.__file__))
+
     service_map = {}
     for startup_file in [some_file for some_file in os.listdir("/etc/init/")
                          if some_file.endswith(".conf")]:
         component = os.path.basename(startup_file).split("-")[0]
         if component in _load_components_from_json(
-                # Need to fix location
-                '/tmp/supported_components.json'):
+                '%s/../etc/supported_components.json' % _module_location()):
             if component not in service_map.keys():
                 service_map[component] = []
             service_map[component].append(
