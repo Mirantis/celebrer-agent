@@ -33,6 +33,15 @@ class CelebrerAgent(object):
         self._INSTANCE_ID = str(uuid.uuid4())
         self._ENDPOINTS = [CelebrerHandler(self)]
         self._SERVICES = utils.detect_services()
+        try:
+            self._check_coverage_utility()
+        except EnvironmentError as e:
+            print e.message
+            exit()
+
+    def _check_coverage_utility(self):
+        if not utils.coverage_bin():
+            raise EnvironmentError("Not found coverage.py utility")
 
     def _prepare_rpc_service(self, rkey, endpoints):
         transport = messaging.get_transport(self._CONF)

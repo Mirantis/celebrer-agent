@@ -46,3 +46,10 @@ def combine(path):
     os.chdir(path)
     commands.getoutput('python-coverage combine')
     os.chdir(cwd)
+
+
+def coverage_bin():
+    for command in ['python-coverage', 'coverage']:
+        if not commands.getstatusoutput(command)[0]:
+            return command
+        return None
