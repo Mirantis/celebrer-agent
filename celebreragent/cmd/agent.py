@@ -1,3 +1,4 @@
+import commands
 import os
 import eventlet
 import sys
@@ -73,6 +74,8 @@ class CelebrerAgent(object):
                    default_config_files=default_config_files)
 
     def is_primary(self):
+        if commands.getoutput('ip a | grep hapr-host'):
+            return astute.ASTUTE.get('fqdn')
         for node in astute.ASTUTE.get('nodes', []):
             if node['fqdn'] == astute.ASTUTE.get('fqdn'):
                 return node['role'] == 'primary-controller'
