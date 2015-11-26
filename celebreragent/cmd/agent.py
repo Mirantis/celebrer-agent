@@ -58,6 +58,9 @@ class CelebrerAgent(object):
     def get_instance_id(self):
         return self._INSTANCE_ID
 
+    def get_coverage_exec(self):
+        return self._COVERAGE_EXEC
+
     def call_rpc(self, rkey, method, **kwargs):
         transport = messaging.get_transport(self._CONF)
         client_target = target.Target('celebrer', rkey)

@@ -14,16 +14,15 @@ class CelebrerHandler(object):
     def __init__(self, agent):
         self.agent = agent
 
-    @classmethod
-    def start_coverage(cls, context, service_name):
-        component, service = cls.agent.get_service(service_name)
+    def start_coverage(self, context, service_name):
+        component, service = self.agent.get_service(service_name)
 
         if service:
             commands.getoutput("service %s stop" % service_name)
             print "Service %s stoppped" % service_name
 
             cmd_run = "%s run --source=%s --parallel-mode %s &" % (
-                cls.agent._COVERAGE_EXEC, component, "%s %s" % (
+                self.agent.get_coverage_exec(), component, "%s %s" % (
                     service.service_params['exec'],
                     service.service_args
                 )
@@ -48,10 +47,9 @@ class CelebrerHandler(object):
             else:
                 commands.getoutput('service %s start' % service_name)
 
-    @classmethod
-    def stop_coverage(cls, context, service_name, component_name):
+    def stop_coverage(self, context, service_name, component_name):
         os.system('kill $(ps hf -C %s | grep "%s" | '
-                  'awk "{print \$1;exit}");' % (cls.agent._COVERAGE_EXEC ,
+                  'awk "{print \$1;exit}");' % (self.agent.get_coverage_exec(),
                                                 service_name))
 
         commands.getoutput('service %s start' % service_name)
@@ -63,7 +61,7 @@ class CelebrerHandler(object):
 
         utils.combine(combine_path)
 
-        if cls.agent.is_primary():
+        if self.agent.is_primary():
             if not os.path.exists(combine_path):
                 os.mkdir(combine_path)
 
@@ -71,24 +69,23 @@ class CelebrerHandler(object):
                 '%s/.coverage' % cov_path,
                 '%s/.coverage.%s' % (
                     combine_path,
-                    cls.agent.get_instance_id()
+                    self.agent.get_instance_id()
                 )
             )
         else:
             with open('%s/.coverage' % cov_path) as binary_report:
                 # Send coverage report to primary controller
-                cls.agent.call_rpc(
+                self.agent.call_rpc(
                     'collector', 'collect_coverage',
                     component_name=component_name,
                     binary_data=utils.prepare_data(
                         binary_report.read(), 'compress'
                     ),
-                    node_uuid=cls.agent.get_instance_id()
+                    node_uuid=self.agent.get_instance_id()
                 )
         os.remove('%s/.coverage' % cov_path)
 
-    @classmethod
-    def collect_coverage(cls, component_name, binary_data, node_uuid):
+    def collect_coverage(self, component_name, binary_data, node_uuid):
         combine_path = '/tmp/coverage-combine_%s' % component_name
 
         if not os.path.exists(combine_path):
@@ -100,8 +97,7 @@ class CelebrerHandler(object):
             binary_report.write(utils.prepare_data(binary_data, 'decompress'))
         utils.combine(combine_path)
 
-    @classmethod
-    def genreport_coverage(cls, context, component_name):
+    def genreport_coverage(self, context, component_name):
         time.sleep(10)
         cov_path = '/tmp/coverage-combine_%s' % component_name
         report_file_name = "coverage_%s_%s.tar.gz" % (
@@ -112,10 +108,10 @@ class CelebrerHandler(object):
         cwd = os.getcwd()
         os.chdir(cov_path)
 
-        commands.getoutput('%s xml' % cls.agent._COVERAGE_EXEC)
+        commands.getoutput('%s xml' % self.agent.get_coverage_exec())
         commands.getoutput('%s html')
         commands.getoutput('%s report --omit=*/openstack/*,*/tests/* -m > '
-                           'report_%s.txt' % (cls.agent._COVERAGE_EXEC,
+                           'report_%s.txt' % (self.agent.get_coverage_exec(),
                                               component_name))
 
         tar_file = tarfile.open(report_file_name, 'w:gz')
@@ -126,7 +122,7 @@ class CelebrerHandler(object):
 
         # Upload report
         with open(report_file_name) as binary_report:
-            cls.agent.call_rpc(
+            self.agent.call_rpc(
                 'reports', 'collect_report',
                 component_name=component_name,
                 binary_data=base64.b64encode(binary_report)
