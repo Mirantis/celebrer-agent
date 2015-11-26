@@ -71,6 +71,7 @@ class CelebrerHandler(object):
                     self.agent.get_instance_id()
                 )
             )
+            utils.combine(combine_path)
         else:
             with open('%s/.coverage' % cov_path) as binary_report:
                 # Send coverage report to primary controller
@@ -82,7 +83,7 @@ class CelebrerHandler(object):
                     ),
                     node_uuid=self.agent.get_instance_id()
                 )
-        os.remove('%s/.coverage' % cov_path)
+        shutil.rmtree(cov_path)
 
     def collect_coverage(self, component_name, binary_data, node_uuid):
         combine_path = '/tmp/coverage-combine_%s' % component_name
@@ -108,7 +109,7 @@ class CelebrerHandler(object):
         os.chdir(cov_path)
 
         commands.getoutput('%s xml' % self.agent.get_coverage_exec())
-        commands.getoutput('%s html')
+        commands.getoutput('%s html' % self.agent.get_coverage_exec())
         commands.getoutput('%s report --omit=*/openstack/*,*/tests/* -m > '
                            'report_%s.txt' % (self.agent.get_coverage_exec(),
                                               component_name))
