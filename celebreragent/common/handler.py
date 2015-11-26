@@ -127,3 +127,4 @@ class CelebrerHandler(object):
                 binary_data=base64.b64encode(binary_report.read())
             )
         os.chdir(cwd)
+        shutil.rmtree(cov_path)
