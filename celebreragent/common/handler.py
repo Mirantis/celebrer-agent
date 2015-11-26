@@ -85,7 +85,6 @@ class CelebrerHandler(object):
                     ),
                     node_uuid=self.agent.get_instance_id()
                 )
-        shutil.rmtree(cov_path)
 
     def collect_coverage(self, component_name, binary_data, node_uuid):
         combine_path = '/tmp/coverage-combine_%s' % component_name
