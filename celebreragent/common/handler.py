@@ -57,11 +57,10 @@ class CelebrerHandler(object):
         print "Service %s started" % service_name
 
         cov_path = '/tmp/coverage_%s' % component_name
-        combine_path = '/tmp/coverage-combine_%s' % component_name
-
-        utils.combine(combine_path)
+        utils.combine(cov_path)
 
         if self.agent.is_primary():
+            combine_path = '/tmp/coverage-combine_%s' % component_name
             if not os.path.exists(combine_path):
                 os.mkdir(combine_path)
 
