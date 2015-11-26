@@ -25,7 +25,8 @@ def detect_services():
                          if some_file.endswith(".conf")]:
         component = os.path.basename(startup_file).split("-")[0]
         if component in _load_components_from_json(
-                '%s/../etc/supported_components.json' % _module_location()):
+            '%s/../etc/supported_components.json' % _module_location()
+        ):
             if component not in service_map.keys():
                 service_map[component] = []
             service_map[component].append(

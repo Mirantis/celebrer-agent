@@ -12,7 +12,7 @@ class Service:
         self.service_params = None
         self.service_args = None
         self.service_description = None
-        self.service_name = os.path.basename(startup_config)
+        self.service_name = os.path.basename(startup_config.replace('.conf', ''))
 
         with open(startup_config) as config:
             self.parse_config(config.read())

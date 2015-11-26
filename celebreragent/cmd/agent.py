@@ -88,7 +88,7 @@ class CelebrerAgent(object):
             for service in service_list:
                 if service.service_name == service_name:
                     return component, service
-        return None
+        return None, None
 
     def main(self):
         try:
