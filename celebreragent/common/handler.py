@@ -19,7 +19,8 @@ class CelebrerHandler(object):
 
             if service:
                 commands.getoutput("service %s stop" % service_name)
-                print "Service %s stoppped" % service_name
+                self.agent.get_logger().debug(
+                    'Stopping %s service', service_name)
 
                 cmd_run = "%s run --source=%s --parallel-mode %s &" % (
                     self.agent.get_coverage_exec(), component, "%s %s" % (
@@ -36,16 +37,21 @@ class CelebrerHandler(object):
                 os.mkdir(cov_path)
                 utils.pushd(cov_path)
 
-                print "RUN: %s" % cmd_run
+                self.agent.get_logger().debug(
+                    'Running %s service under coverage util', service_name)
 
                 os.system(cmd_run)
 
                 time.sleep(3)
                 if service_name not in commands.getoutput("ps aux"):
                     commands.getoutput('service %s start' % service_name)
+                    self.agent.get_logger().warn(
+                        'Failure to start %s service under coverage', service_name)
                     service_status = 'Failure'
                 else:
                     service_status = 'Started'
+                    self.agent.get_logger().debug(
+                        'Success started %s service under coverage', service_name)
 
                 utils.popd()
                 self.agent.call_rpc('reports', 'set_status',
@@ -64,7 +70,8 @@ class CelebrerHandler(object):
 
             commands.getoutput('service %s start' % service)
 
-            print "Service %s started" % service
+            self.agent.get_logger().debug(
+                        'Start %s service in normal mode', service_name)
 
             cov_path = '/tmp/coverage_%s' % component
             utils.combine(cov_path)

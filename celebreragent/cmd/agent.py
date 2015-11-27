@@ -34,10 +34,11 @@ class CelebrerAgent(object):
         self._INSTANCE_ID = str(uuid.uuid4())
         self._ENDPOINTS = [CelebrerHandler(self)]
         self._SERVICES = utils.detect_services()
+        self._LOG = logging.getLogger(__name__)
         try:
             self._COVERAGE_EXEC = self._check_coverage_utility()
-        except EnvironmentError as e:
-            print e.message
+        except EnvironmentError as ex:
+            self._LOG.exception(ex)
             exit()
 
     def _check_coverage_utility(self):
@@ -50,12 +51,15 @@ class CelebrerAgent(object):
         transport = messaging.get_transport(self._CONF)
         s_target = target.Target(
             'celebrer', rkey,
-            server=self._INSTANCE_ID,
+            server=self.get_logger(),
             fanout=True
         )
         return messaging.get_rpc_server(
             transport, s_target, endpoints, 'eventlet'
         )
+
+    def get_logger(self):
+        return self._LOG
 
     def get_instance_id(self):
         return self._INSTANCE_ID
@@ -72,6 +76,7 @@ class CelebrerAgent(object):
     def parse_args(self, args=None, usage=None, default_config_files=None):
         logging.register_options(self._CONF)
         logging.setup(self._CONF, 'celebrer')
+
         self._CONF(args=args,
                    project='celebrer',
                    version=version.version_info,
