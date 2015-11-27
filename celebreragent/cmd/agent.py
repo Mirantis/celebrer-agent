@@ -115,8 +115,8 @@ class CelebrerAgent(object):
 
             self.call_rpc("discovery", "discover_services",
                           services={
-                              component: service.service_name for
-                              component, service in self._SERVICES.items()
+                              component: svc.service_name for
+                              component, svc in self._SERVICES.items()
                           },
                           node_uuid=self.get_instance_id())
 
