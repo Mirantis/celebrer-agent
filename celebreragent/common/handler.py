@@ -65,7 +65,7 @@ class CelebrerHandler(object):
 
             os.system(
                 'kill $(ps hf -C %s | grep "%s" | awk "{print \$1;exit}");' %
-                (self.agent.get_coverage_exec(), service)
+                (self.agent.get_coverage_exec(), service_name)
             )
 
             commands.getoutput('service %s start' % service)
