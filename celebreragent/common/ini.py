@@ -43,7 +43,7 @@ class ConfigFile:
 
     def find(self, key):
         sections = []
-        for section, parameters in self.config:
+        for section, parameters in self.config.items():
             if key in parameters.keys():
                 sections.append(section)
         return sections
