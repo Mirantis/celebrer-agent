@@ -73,6 +73,12 @@ class CelebrerAgent(object):
         client = rpc.RPCClient(transport, client_target, timeout=15)
         client.call({}, method, **kwargs)
 
+    def cast_rpc(self, rkey, method, **kwargs):
+        transport = messaging.get_transport(self._CONF)
+        client_target = target.Target('celebrer', rkey, fanout=True)
+        client = rpc.RPCClient(transport, client_target, timeout=15)
+        client.cast({}, method, **kwargs)
+
     def parse_args(self, args=None, usage=None, default_config_files=None):
         logging.register_options(self._CONF)
         logging.setup(self._CONF, 'celebrer')
@@ -113,6 +119,8 @@ class CelebrerAgent(object):
                 launcher.launch_service(
                     self._prepare_rpc_service(component, self._ENDPOINTS))
 
+            # ToDO: Need to call a new exception with message:
+            # "Can't find engine"
             self.call_rpc("discovery", "discover_services",
                           services={
                               component: [svc.service_name for svc in svc_list]

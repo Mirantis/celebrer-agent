@@ -13,8 +13,16 @@ class CelebrerHandler(object):
     def __init__(self, agent):
         self.agent = agent
 
-    def start_coverage(self, context, services):
-        for service_name in services:
+    def handle_task(self, context, task):
+        if task['action'] == 'start':
+            self.start_coverage(task)
+        elif task['action'] == 'stop':
+            self.stop_coverage(task)
+        elif task['action'] == 'gen_report':
+            self.genreport_coverage(task)
+
+    def start_coverage(self, task):
+        for service_name in task['services']:
             component, service = self.agent.get_service(service_name)
 
             if service:
@@ -54,13 +62,15 @@ class CelebrerHandler(object):
                         'Success started %s service under coverage', service_name)
 
                 utils.popd()
-                self.agent.call_rpc('reports', 'set_status',
-                                    service_name=service_name,
-                                    server_id=self.agent.get_instance_id(),
-                                    status=service_status)
+                self.agent.call_rpc('reports', 'set_status', status={
+                    "service_name": service_name,
+                    "server_id": self.agent.get_instance_id(),
+                    "status": service_status,
+                    "task_id": task['id']
+                })
 
-    def stop_coverage(self, context, services):
-        for service_name in services:
+    def stop_coverage(self, task):
+        for service_name in task['services']:
             component, service = self.agent.get_service(service_name)
 
             os.system(
@@ -100,28 +110,32 @@ class CelebrerHandler(object):
                         ),
                         node_uuid=self.agent.get_instance_id()
                     )
-            self.agent.call_rpc('reports', 'set_status',
-                                service_name=service_name,
-                                server_id=self.agent.get_instance_id(),
-                                status='Stopped')
 
-    def collect_coverage(self, component_name, binary_data, node_uuid):
-        combine_path = '/tmp/coverage-combine_%s' % component_name
+            self.agent.call_rpc('reports', 'set_status', status={
+                "service_name": service_name,
+                "server_id": self.agent.get_instance_id(),
+                "status": 'Stoppped',
+                "task_id": task['id']
+            })
+
+    def collect_coverage(self, task):
+        combine_path = '/tmp/coverage-combine_%s' % task['component_name']
 
         if not os.path.exists(combine_path):
             os.mkdir(combine_path)
 
         with open(
-            '%s/.coverage.%s' % (combine_path, node_uuid), 'w'
+            '%s/.coverage.%s' % (combine_path, task['node_uuid']), 'w'
         ) as binary_report:
-            binary_report.write(utils.prepare_data(binary_data, 'decompress'))
+            binary_report.write(utils.prepare_data(task['binary_data'],
+                                                   'decompress'))
         utils.combine(combine_path)
 
-    def genreport_coverage(self, context, component_name):
+    def genreport_coverage(self, task):
         time.sleep(10)
-        cov_path = '/tmp/coverage-combine_%s' % component_name
+        cov_path = '/tmp/coverage-combine_%s' % task['component_name']
         report_file_name = "coverage_%s_%s.tar.gz" % (
-            component_name,
+            task['component_name'],
             str(time.time())
         )
 
@@ -133,7 +147,7 @@ class CelebrerHandler(object):
                            self.agent.get_coverage_exec())
         commands.getoutput('%s report --omit=*/openstack/*,*/tests/* -m > '
                            'report_%s.txt' % (self.agent.get_coverage_exec(),
-                                              component_name))
+                                              task['component_name']))
 
         tar_file = tarfile.open(report_file_name, 'w:gz')
         file_list = os.listdir(cov_path)
@@ -143,10 +157,11 @@ class CelebrerHandler(object):
 
         # Upload report
         with open(report_file_name) as binary_report:
-            self.agent.call_rpc(
+            self.agent.cast_rpc(
                 'reports', 'collect_report',
-                component_name=component_name,
-                binary_data=binary_report.read().encode('base64')
+                component_name=task['component_name'],
+                binary_data=binary_report.read().encode('base64'),
+                task_id=task['id']
             )
         utils.popd()
         shutil.rmtree(cov_path)
