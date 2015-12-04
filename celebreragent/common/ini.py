@@ -34,19 +34,35 @@ class ConfigFile:
         return ConfigFile(config_data)
 
     def set(self, section, key, value):
-        if section not in self.config.keys:
+        if section not in self.config.keys():
             self.config[section] = {}
         self.config[section][key] = value
 
     def get(self, section, key):
         return self.config.get(section, {}).get(key, None)
 
-    def find(self, key):
+    def find_by_name(self, key):
         sections = []
         for section, parameters in self.config.items():
             if key in parameters.keys():
                 sections.append(section)
         return sections
+
+    def find_by_name_part(self, key_part):
+        sections = []
+        for section, parameters in self.config.items():
+            for key in parameters.keys():
+                if key_part in key:
+                    sections.append((section, key))
+        return sections
+
+    def replace_by_name(self, key, value):
+        for section in self.find_by_name(key):
+            self.set(section, key, value)
+
+    def replace_by_name_part(self, key_part, value):
+        for section, key in self.find_by_name_part(key_part):
+            self.set(section, key, value)
 
     def dump(self, config_file):
         with open(config_file, "w") as config:
