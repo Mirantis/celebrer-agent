@@ -33,7 +33,9 @@ class CelebrerHandler(object):
                 cmd_run = "%s run --source=%s --parallel-mode %s &" % (
                     self.agent.get_coverage_exec(), component, "%s %s" % (
                         service.service_params['exec'],
-                        service.service_args
+                        " ".join(
+                            ["--%s %s" % item for item in service.service_args.items()]
+                        )
                     )
                 )
 

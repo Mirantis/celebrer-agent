@@ -27,12 +27,17 @@ class Service:
             self.service_description = service_description.groups()[0]
 
         if exec_command:
-            daemon_param_string, args = exec_command.groups()
+            daemon_param_string, service_args_string = exec_command.groups()
 
             daemon_params = re.findall(
                 SERVICE_PARAM_REGEX,
                 re.sub(r"(\s+|\s*\\\n\s*)", " ", daemon_param_string)
             )
 
+            service_args = re.findall(
+                SERVICE_PARAM_REGEX,
+                re.sub(r"(\s+|\s*\\\n\s*)", " ", service_args_string)
+            )
+
             self.service_params = {param: value for param, value in daemon_params}
-            self.service_args = re.sub(r"(\s+|\s*\\\n\s*)", " ", args)
+            self.service_args = {param: value for param, value in service_args}
