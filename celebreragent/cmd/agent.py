@@ -31,7 +31,7 @@ class CelebrerAgent(object):
 
     def __init__(self):
         self._CONF = cfg.CONF
-        self._INSTANCE_ID = str(uuid.uuid4())
+        self._INSTANCE_ID = self._CONF.agent_uuid
         self._ENDPOINTS = [CelebrerHandler(self)]
         self._SERVICES = utils.detect_services()
         self._LOG = logging.getLogger(__name__)
@@ -83,10 +83,10 @@ class CelebrerAgent(object):
 
     def parse_args(self, args=None, usage=None, default_config_files=None):
         logging.register_options(self._CONF)
-        logging.setup(self._CONF, 'celebrer')
+        logging.setup(self._CONF, 'celebreragent')
 
         self._CONF(args=args,
-                   project='celebrer',
+                   project='celebreragent',
                    version=version.version_info,
                    usage=usage,
                    default_config_files=default_config_files)
