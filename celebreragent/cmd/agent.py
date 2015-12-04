@@ -2,7 +2,6 @@ import commands
 import os
 import eventlet
 import sys
-import uuid
 
 import oslo_messaging as messaging
 from oslo_messaging import target
@@ -11,11 +10,10 @@ from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_messaging import rpc
 
-
-from celebreragent import version
 from celebreragent.common import utils
 from celebreragent.common.handler import CelebrerHandler
 from celebreragent.common import astute
+from celebreragent.common import config
 
 if os.name == 'nt':
     eventlet.monkey_patch(os=False)
@@ -81,16 +79,6 @@ class CelebrerAgent(object):
         client.prepare(retry=5)
         client.cast({}, method, **kwargs)
 
-    def parse_args(self, args=None, usage=None, default_config_files=None):
-        logging.register_options(self._CONF)
-        logging.setup(self._CONF, 'celebreragent')
-
-        self._CONF(args=args,
-                   project='celebreragent',
-                   version=version.version_info,
-                   usage=usage,
-                   default_config_files=default_config_files)
-
     def is_primary(self):
         if commands.getoutput('ip a | grep hapr-host'):
             return astute.ASTUTE.get('fqdn')
@@ -107,7 +95,7 @@ class CelebrerAgent(object):
 
     def main(self):
         try:
-            self.parse_args()
+            config.parse_args()
 
             logging.setup(self._CONF, 'celebrer-agent')
             launcher = service.ServiceLauncher(self._CONF)
