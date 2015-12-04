@@ -78,7 +78,7 @@ class CelebrerHandler(object):
                 (self.agent.get_coverage_exec(), service_name)
             )
 
-            commands.getoutput('service %s start' % service)
+            commands.getoutput('service %s start' % service_name)
 
             self.agent.get_logger().debug(
                         'Start %s service in normal mode', service_name)
