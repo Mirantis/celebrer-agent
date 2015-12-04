@@ -6,7 +6,7 @@
   "sahara": true,
   "murano": true,
   "glance": true,
-  "heat": true,
+  "heat": false,
   "mistral": true,
   "neutron": false,
   "keystone": false
