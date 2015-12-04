@@ -109,8 +109,6 @@ class CelebrerAgent(object):
 
             logging.setup(self._CONF, 'celebrer-agent')
             launcher = service.ServiceLauncher(self._CONF)
-            launcher.launch_service(self._prepare_rpc_service("discovery",
-                                                              self._ENDPOINTS))
             if self.is_primary():
                 launcher.launch_service(
                     self._prepare_rpc_service("collector", self._ENDPOINTS))
