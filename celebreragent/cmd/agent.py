@@ -71,12 +71,14 @@ class CelebrerAgent(object):
         transport = messaging.get_transport(self._CONF)
         client_target = target.Target('celebrer', rkey)
         client = rpc.RPCClient(transport, client_target, timeout=15)
+        client.prepare(retry=5)
         client.call({}, method, **kwargs)
 
     def cast_rpc(self, rkey, method, **kwargs):
         transport = messaging.get_transport(self._CONF)
         client_target = target.Target('celebrer', rkey, fanout=True)
         client = rpc.RPCClient(transport, client_target, timeout=15)
+        client.prepare(retry=5)
         client.cast({}, method, **kwargs)
 
     def parse_args(self, args=None, usage=None, default_config_files=None):
