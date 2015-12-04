@@ -121,7 +121,7 @@ class CelebrerAgent(object):
 
             # ToDO: Need to call a new exception with message:
             # "Can't find engine"
-            self.call_rpc("discovery", "discover_services",
+            self.cast_rpc("discovery", "discover_services",
                           services={
                               component: [svc.service_name for svc in svc_list]
                               for component, svc_list in self._SERVICES.items()
