@@ -4,8 +4,10 @@ import shutil
 import tarfile
 import time
 import os
+import tempfile
 
 from . import utils
+from . import ini
 
 
 class CelebrerHandler(object):
@@ -29,12 +31,18 @@ class CelebrerHandler(object):
                 commands.getoutput("service %s stop" % service_name)
                 self.agent.get_logger().debug(
                     'Stopping %s service', service_name)
-
+                cmd_svc_args = service.service_args.items()
+                if 'config-file' in cmd_svc_args.keys():
+                    cfg = ini.ConfigFile.load(cmd_svc_args['config-file'])
+                    cfg.replace_by_name_part('worker', 1)
+                    cfg_patched = tempfile.mkstemp()[1]
+                    cfg.dump(cfg_patched)
+                    cmd_svc_args['config-file'] = cfg_patched
                 cmd_run = "%s run --source=%s --parallel-mode %s &" % (
                     self.agent.get_coverage_exec(), component, "%s %s" % (
                         service.service_params['exec'],
                         " ".join(
-                            ["--%s %s" % item for item in service.service_args.items()]
+                            ["--%s %s" % item for item in cmd_svc_args]
                         )
                     )
                 )
