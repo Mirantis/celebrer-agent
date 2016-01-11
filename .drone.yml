@@ -1,9 +1,0 @@
-clone:
-  path: celebrer-agent
-
-image: python:2.7
-pull: true
-privileged: true
-script:  
-  - ./.drone/build.sh
-Status API Training Shop Blog About Pricing
