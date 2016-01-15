@@ -2,7 +2,6 @@
   "nova": true,
   "cinder": true,
   "swift": true,
-  "ceph": true,
   "sahara": true,
   "murano": true,
   "glance": true,
