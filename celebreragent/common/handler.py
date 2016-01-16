@@ -47,7 +47,7 @@ class CelebrerHandler(object):
                     )
                 )
 
-                cov_path = '/tmp/coverage_%s' % component
+                cov_path = '/var/cache/celebrer/coverage_%s' % component
 
                 if os.path.exists(cov_path):
                     shutil.rmtree(cov_path)
@@ -93,11 +93,11 @@ class CelebrerHandler(object):
             self.agent.get_logger().debug(
                         'Start %s service in normal mode', service_name)
 
-            cov_path = '/tmp/coverage_%s' % component
+            cov_path = '/var/cache/celebrer/coverage_%s' % component
             utils.combine(cov_path)
 
             if self.agent.is_primary():
-                combine_path = '/tmp/coverage-combine_%s' % component
+                combine_path = '/var/cache/celebrer/coverage-combine_%s' % component
                 if not os.path.exists(combine_path):
                     os.mkdir(combine_path)
 
@@ -129,7 +129,7 @@ class CelebrerHandler(object):
             })
 
     def collect_coverage(self, task):
-        combine_path = '/tmp/coverage-combine_%s' % task['component_name']
+        combine_path = '/var/cache/celebrer/coverage-combine_%s' % task['component_name']
 
         if not os.path.exists(combine_path):
             os.mkdir(combine_path)
@@ -143,7 +143,7 @@ class CelebrerHandler(object):
 
     def genreport_coverage(self, task):
         time.sleep(10)
-        cov_path = '/tmp/coverage-combine_%s' % task['component_name']
+        cov_path = '/var/cache/celebrer/coverage-combine_%s' % task['component_name']
         report_file_name = "coverage_%s_%s.tar.gz" % (
             task['component_name'],
             str(time.time())
